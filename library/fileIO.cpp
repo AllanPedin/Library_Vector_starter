@@ -4,7 +4,8 @@
 #include <sstream>
 
 using namespace std;
-
+/**helper for load books
+ * csv string book => struct book*/
 book parseBook(std::string line){
 	book myBook;
 	stringstream streamLine(line);
@@ -18,7 +19,7 @@ book parseBook(std::string line){
 				myBook.state= IN;
 			}break;//might need if for OUT but i dont know what that looks like yet//TODO
 			case 4:myBook.loaned_to_patron_id=stoi(token);break;
-			default:cout<<"pls dont go here \n";break;
+			default:cout<<"pls dont go here (Book) \n";break;
 		}
 	}
 	return myBook;
@@ -52,6 +53,22 @@ int saveBooks(std::vector<book> &books, const char* filename)
 {
 	return SUCCESS;
 }
+/** helper for load patrons
+ * csv string patron => struct patron*/
+patron parsePatron(std::string line){
+	patron myPatron;
+	stringstream streamLine(line);
+	string token;
+	for(int i=0;getline(streamLine, token, ',');i++){
+		switch(i){
+			case 0:myPatron.patron_id=stoi(token);break;
+			case 1:myPatron.name=token;break;
+			case 2:myPatron.number_books_checked_out=stoi(token);break;
+			default:cout<<"pls dont go here (Patron)\n";break;
+		}
+	}
+	return myPatron;
+}
 
 /* clears, then loads patrons from the file filename
  * returns  COULD_NOT_OPEN_FILE if cannot open filename
@@ -60,7 +77,17 @@ int saveBooks(std::vector<book> &books, const char* filename)
  * */
 int loadPatrons(std::vector<patron> &patrons, const char* filename)
 {
-	return SUCCESS;
+	ifstream fileStream (filename);
+		if(!fileStream.is_open()){
+			return COULD_NOT_OPEN_FILE;
+		}
+		for (string line; getline(fileStream,line); ){
+			patrons.push_back(parsePatron(line));
+		}
+		if(patrons.size()==0){
+			return NO_PATRONS_IN_LIBRARY;
+		}
+		return SUCCESS;
 }
 
 /* serializes patrons to the file filename
