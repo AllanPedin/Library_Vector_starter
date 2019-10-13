@@ -17,7 +17,9 @@ book parseBook(std::string line){
 			case 2:myBook.author=token;break;
 			case 3:if(stoi(token)==1){
 				myBook.state= IN;
-			}break;//might need if for OUT but i dont know what that looks like yet//TODO
+			}else if(stoi(token)==2){//Not exactly sure if thats the right number but well see
+				myBook.state = OUT;
+			}break;
 			case 4:myBook.loaned_to_patron_id=stoi(token);break;
 			default:cout<<"pls dont go here (Book) \n";break;
 		}
@@ -38,6 +40,7 @@ int loadBooks(std::vector<book> &books, const char* filename)
 	for (string line; getline(fileStream,line); ){
 		books.push_back(parseBook(line));
 	}
+	fileStream.close();
 	if(books.size()==0){
 		return NO_BOOKS_IN_LIBRARY;
 	}
@@ -51,6 +54,22 @@ int loadBooks(std::vector<book> &books, const char* filename)
  * */
 int saveBooks(std::vector<book> &books, const char* filename)
 {
+	if(books.size()==0){
+		return NO_BOOKS_IN_LIBRARY;
+	}
+	ofstream fileStream;
+	fileStream.open(filename);
+	if(!fileStream.is_open() || fileStream.fail()){
+		return COULD_NOT_OPEN_FILE;
+	}
+	for(book myBook:books){
+		fileStream 	<< myBook.book_id << ","
+					<< myBook.title<< ","
+					<< myBook.author<< ","
+					<< myBook.state<< ","
+					<< myBook.loaned_to_patron_id<< "\n";
+	}
+	fileStream.close();
 	return SUCCESS;
 }
 /** helper for load patrons
@@ -78,16 +97,17 @@ patron parsePatron(std::string line){
 int loadPatrons(std::vector<patron> &patrons, const char* filename)
 {
 	ifstream fileStream (filename);
-		if(!fileStream.is_open()){
-			return COULD_NOT_OPEN_FILE;
-		}
-		for (string line; getline(fileStream,line); ){
-			patrons.push_back(parsePatron(line));
-		}
-		if(patrons.size()==0){
-			return NO_PATRONS_IN_LIBRARY;
-		}
-		return SUCCESS;
+	if(!fileStream.is_open()){
+		return COULD_NOT_OPEN_FILE;
+	}
+	for (string line; getline(fileStream,line); ){
+		patrons.push_back(parsePatron(line));
+	}
+	fileStream.close();
+	if(patrons.size()==0){
+		return NO_PATRONS_IN_LIBRARY;
+	}
+	return SUCCESS;
 }
 
 /* serializes patrons to the file filename
@@ -97,5 +117,19 @@ int loadPatrons(std::vector<patron> &patrons, const char* filename)
  * */
 int savePatrons(std::vector<patron> &patrons, const char* filename)
 {
+	if(patrons.size()==0){
+		return NO_BOOKS_IN_LIBRARY;
+	}
+	ofstream fileStream;
+	fileStream.open(filename);
+	if(!fileStream.is_open() || fileStream.fail()){
+		return COULD_NOT_OPEN_FILE;
+	}
+	for(patron myPatron:patrons){
+		fileStream 	<< myPatron.patron_id << ","
+					<< myPatron.name<< ","
+					<< myPatron.number_books_checked_out<< "\n";
+	}
+	fileStream.close();
 	return SUCCESS;
 }
