@@ -12,13 +12,17 @@ using namespace std;
 //NOTE: please ensure patron and book data are loaded from disk before calling the following
 //NOTE: also make sure you save patron and book data to disk any time you make a change to them
 //NOTE: for files where data is stored see constants.h BOOKFILE and PATRONFILE
-
+vector<book> books;
+vector<patron> patrons;
 /*
  * clear books and patrons containers
  * then reload them from disk 
  */
 void reloadAllData(){
-
+	books.clear();
+	patrons.clear();
+	loadBooks(books, BOOKFILE.c_str());
+	loadPatrons(patrons, PATRONFILE.c_str());
 }
 
 /* checkout a book to a patron
@@ -71,7 +75,18 @@ int checkin(int bookid){
  *    the patron_id of the person added
  */
 int enroll(std::string &name){
-	return 0;
+	reloadAllData();
+	patron myPatron;
+		if(patrons.size()>0){
+			myPatron.patron_id = patrons.back().patron_id +1;//just kinda hoping this list is ordered
+		}else{
+			myPatron.patron_id=0;
+		}
+		myPatron.name = name;
+		myPatron.number_books_checked_out = NONE;
+	patrons.push_back(myPatron);
+	savePatrons(patrons,PATRONFILE.c_str());
+	return myPatron.patron_id;
 }
 
 /*
@@ -80,7 +95,8 @@ int enroll(std::string &name){
  * 
  */
 int numbBooks(){
-	return 0;
+	reloadAllData();
+	return books.size();
 }
 
 /*
@@ -88,7 +104,8 @@ int numbBooks(){
  * (ie. if 3 patrons returns 3)
  */
 int numbPatrons(){
-	return 0;
+	reloadAllData();
+	return patrons.size();
 }
 
 /*the number of books patron has checked out
@@ -107,6 +124,12 @@ int howmanybooksdoesPatronHaveCheckedOut(int patronid){
  *         PATRON_NOT_ENROLLED no patron with this patronid
  */
 int whatIsPatronName(std::string &name,int patronid){
-	return SUCCESS;
+	for(patron myPatron :patrons){
+		if(myPatron.patron_id==patronid){
+			name = myPatron.name;
+			return SUCCESS;
+		}
+	}
+	return PATRON_NOT_ENROLLED;
 }
 
