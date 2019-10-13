@@ -59,7 +59,6 @@ int checkout(int bookid, int patronid){
 					myBook.loaned_to_patron_id = patronid;
 					savePatrons(patrons,PATRONFILE.c_str());
 					saveBooks(books,BOOKFILE.c_str());
-					cout <<myPatron.number_books_checked_out<<"\n";
 					return SUCCESS;
 				}
 			}
@@ -112,11 +111,7 @@ int checkin(int bookid){
 int enroll(std::string &name){
 	reloadAllData();
 	patron myPatron;
-		if(patrons.size()>0){
-			myPatron.patron_id = patrons.back().patron_id +1;//just kinda hoping this list is ordered
-		}else{
-			myPatron.patron_id=0;
-		}
+		myPatron.patron_id = patrons.size();
 		myPatron.name = name;
 		myPatron.number_books_checked_out = NONE;
 	patrons.push_back(myPatron);
