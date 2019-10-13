@@ -46,7 +46,27 @@ void reloadAllData(){
  *         TOO_MANY_OUT patron has the max number of books allowed checked out
  */
 int checkout(int bookid, int patronid){
-	return SUCCESS;
+	reloadAllData();
+	for(patron& myPatron: patrons){
+		if(myPatron.patron_id==patronid){
+			for(book& myBook: books){
+				if(myBook.book_id==bookid){
+					if(myPatron.number_books_checked_out>=MAX_BOOKS_ALLOWED_OUT){
+						return TOO_MANY_OUT;
+					}
+					myPatron.number_books_checked_out++;
+					myBook.state = OUT;
+					myBook.loaned_to_patron_id = patronid;
+					savePatrons(patrons,PATRONFILE.c_str());
+					saveBooks(books,BOOKFILE.c_str());
+					cout <<myPatron.number_books_checked_out<<"\n";
+					return SUCCESS;
+				}
+			}
+			return BOOK_NOT_IN_COLLECTION;
+		}
+	}
+	return PATRON_NOT_ENROLLED;
 }
 
 /* check a book back in 
@@ -62,7 +82,22 @@ int checkout(int bookid, int patronid){
  * 		   BOOK_NOT_IN_COLLECTION
  */
 int checkin(int bookid){
-	return SUCCESS;
+	reloadAllData();
+	for(book& myBook: books){
+		if(myBook.book_id==bookid){
+			for(patron& myPatron: patrons){
+				if(myPatron.patron_id==myBook.loaned_to_patron_id){
+					myPatron.number_books_checked_out--;
+					myBook.loaned_to_patron_id = NO_ONE;
+					myBook.state = IN;
+					savePatrons(patrons,PATRONFILE.c_str());
+					saveBooks(books,BOOKFILE.c_str());
+					return SUCCESS;
+				}
+			}
+		}
+	}
+	return BOOK_NOT_IN_COLLECTION;
 }
 
 /*
@@ -114,7 +149,12 @@ int numbPatrons(){
  *        or PATRON_NOT_ENROLLED         
  */
 int howmanybooksdoesPatronHaveCheckedOut(int patronid){
-	return 0;
+	for(patron myPatron: patrons){
+		if(myPatron.patron_id==patronid){
+			return myPatron.number_books_checked_out;
+		}
+	}
+	return PATRON_NOT_ENROLLED;
 }
 
 /* search through patrons container to see if patronid is there
